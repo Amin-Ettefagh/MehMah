@@ -591,3 +591,56 @@ body::before{
   }
   .reveal{opacity:1;transform:none}
 }
+
+/* ===== Mobile meme fix ===== */
+.reveal{opacity:1;transform:none}
+.js-reveal .reveal{opacity:0;transform:translateY(18px);transition:opacity .65s ease,transform .65s ease}
+.js-reveal .reveal.show{opacity:1;transform:none}
+#memes.reveal,.js-reveal #memes.reveal{opacity:1 !important;transform:none !important}
+
+.meme-grid{width:100%;align-items:start}
+.meme-card{width:100%;min-width:0}
+.meme-card img{display:block;width:100%;height:auto}
+.meme-card.is-missing img{display:none}
+.meme-card.is-missing::before{
+  content:"تصویر این میم پیدا نشد";
+  display:grid;
+  place-items:center;
+  min-height:240px;
+  padding:24px;
+  color:#a79dac;
+  background:#0a0a0a;
+  border-bottom:1px solid rgba(255,255,255,.06)
+}
+
+@media (max-width:640px){
+  #memes{overflow:visible !important}
+  .meme-grid{
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) !important;
+    gap:16px !important;
+    width:100% !important;
+  }
+  .meme-card{
+    display:block !important;
+    opacity:1 !important;
+    visibility:visible !important;
+    transform:none !important;
+    overflow:hidden;
+    width:100% !important;
+  }
+  .meme-card img{
+    display:block !important;
+    width:100% !important;
+    height:auto !important;
+    min-height:0 !important;
+    aspect-ratio:auto !important;
+    object-fit:contain !important;
+    background:#080808;
+  }
+  .meme-card figcaption{
+    display:block !important;
+    min-height:0 !important;
+    padding:14px 15px 17px !important;
+  }
+}

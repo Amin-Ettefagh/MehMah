@@ -1,3 +1,5 @@
+document.documentElement.classList.add("js-reveal");
+
 const memes = [
   { file: "1.png",  text: "فقط اورتینک کن؛ چون معلومه فکر اول کافی نبوده." },
   { file: "2.png",  text: "تفریح‌های موردعلاقه‌ش؛ بیرون رفتن، سفر، کوه و هر چیزی که بشه بعدش درباره‌ش اورتینک کرد." },
@@ -33,31 +35,44 @@ function shuffle(items) {
   return a;
 }
 
+function createMemeCard(meme, index) {
+  const figure = document.createElement("figure");
+  figure.className = "meme-card";
+
+  const img = document.createElement("img");
+  img.src = meme.file;
+  img.alt = `میم پگاه شماره ${meme.file.replace(".png", "")}`;
+  img.decoding = "async";
+  img.loading = index < 4 ? "eager" : "lazy";
+
+  img.addEventListener("error", () => {
+    figure.classList.add("is-missing");
+  });
+
+  const caption = document.createElement("figcaption");
+  caption.innerHTML = `<span class="meme-number">#${meme.file.replace(".png", "")}</span>${meme.text}`;
+
+  figure.appendChild(img);
+  figure.appendChild(caption);
+  return figure;
+}
+
 function renderMemes() {
   const grid = document.getElementById("memeGrid");
-  const randomized = shuffle(memes);
+  if (!grid) return;
 
-  grid.innerHTML = randomized.map((meme, index) => `
-    <figure class="meme-card" style="animation-delay:${index * 18}ms">
-      <img
-        src="${meme.file}"
-        alt="میم پگاه شماره ${meme.file.replace(".png","")}"
-        loading="lazy"
-        decoding="async"
-      />
-      <figcaption>
-        <span class="meme-number">#${meme.file.replace(".png","")}</span>
-        ${meme.text}
-      </figcaption>
-    </figure>
-  `).join("");
+  const randomized = shuffle(memes);
+  const fragment = document.createDocumentFragment();
+  randomized.forEach((meme, index) => fragment.appendChild(createMemeCard(meme, index)));
+  grid.replaceChildren(fragment);
 }
 
 function buildLogoRail() {
   const rail = document.getElementById("logoRail");
+  if (!rail) return;
+
   const width = window.innerWidth;
   let count = 5;
-
   if (width < 430) count = 4;
   else if (width < 700) count = 6;
   else if (width < 1100) count = 9;
@@ -70,6 +85,12 @@ function buildLogoRail() {
 
 function initReveal() {
   const items = document.querySelectorAll(".reveal");
+
+  if (!("IntersectionObserver" in window)) {
+    items.forEach(item => item.classList.add("show"));
+    return;
+  }
+
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -77,22 +98,22 @@ function initReveal() {
         observer.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.08 });
+  }, { threshold: 0.02, rootMargin: "0px 0px 120px 0px" });
 
   items.forEach(item => observer.observe(item));
 }
 
-document.getElementById("shuffleBtn").addEventListener("click", () => {
-  renderMemes();
-  document.getElementById("memes").scrollIntoView({ behavior: "smooth", block: "start" });
-});
+const shuffleBtn = document.getElementById("shuffleBtn");
+if (shuffleBtn) {
+  shuffleBtn.addEventListener("click", renderMemes);
+}
 
 let resizeTimer;
 window.addEventListener("resize", () => {
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(buildLogoRail, 120);
-});
+}, { passive: true });
 
-buildLogoRail();
 renderMemes();
+buildLogoRail();
 initReveal();
